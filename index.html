@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Enterprise Procurement & Internal Audit System - Our Little Store</title>
+    <!-- Google Fonts & Tailwind CSS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            primary: '#E07A5F',   /* Warm Terracotta */
+                            primaryHover: '#D0694E',
+                            secondary: '#2A9D8F', /* Sage/Forest Green */
+                            accent: '#F4A261',    /* Amber Gold */
+                            dark: '#264653',      /* Deep Slate/Dark Navy */
+                            lightBg: '#F8F9FA'
+                        }
+                    },
+                    fontFamily: { sans: ['Prompt', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Prompt', sans-serif; color: #264653; background-color: #F8F9FA; -webkit-tap-highlight-color: transparent; }
+        .tab-active { color: #E07A5F; border-bottom: 2.5px solid #E07A5F; }
+        .glass-card { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.6); }
+        .bg-hero-pattern {
+            background-image: linear-gradient(to bottom, rgba(38, 70, 83, 0.75), rgba(224, 122, 95, 0.85)), url('https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1600&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+        .bg-card-pattern {
+            background-image: linear-gradient(to bottom right, rgba(38, 70, 83, 0.92), rgba(42, 157, 143, 0.88)), url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1000&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-brand-primary selection:text-white relative">
+
+    <!-- Toast Notification Container -->
+    <div id="toast" class="fixed top-4 right-4 left-4 sm:left-auto sm:w-96 z-50 transform translate-y-[-150%] opacity-0 transition-all duration-300 ease-in-out flex items-center gap-3 bg-white/95 backdrop-blur-md border border-gray-100 shadow-2xl rounded-2xl p-4">
+        <div id="toast-icon-bg" class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
+            <i id="toast-icon" data-lucide="info" class="w-5 h-5"></i>
+        </div>
+        <div>
+            <h4 id="toast-title" class="font-bold text-sm text-brand-dark">ข้อความแจ้งเตือน</h4>
+            <p id="toast-msg" class="text-xs text-gray-500 mt-0.5">รายละเอียดการทำงาน</p>
+        </div>
+    </div>
+
+    <!-- Enterprise Top Announcement Bar -->
+    <div class="bg-brand-dark text-white text-xs py-2 px-4 text-center font-medium flex justify-center items-center gap-2 shadow-sm relative z-30">
+        <i data-lucide="shield-check" class="w-4 h-4 text-brand-accent animate-pulse"></i>
+        <span>ระบบบริหารจัดการเบิกจ่ายพัสดุและตรวจสอบการเงินภายในองค์กร (Internal Procurement & Audit System)</span>
+    </div>
+
+    <!-- Navigation Header -->
+    <nav class="bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainView('auth')">
+                <div class="w-10 h-10 bg-brand-primary rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-md">O</div>
+                <div>
+                    <span class="text-lg font-bold text-brand-dark tracking-tight leading-none block">Our Little Store</span>
+                    <span class="text-[10px] text-gray-400 font-medium">Internal Enterprise System</span>
+                </div>
+            </div>
+            
+            <!-- Dynamic Navigation Links -->
+            <div id="nav-user-section" class="flex items-center gap-3"></div>
+        </div>
+    </nav>
+
+    <!-- Background Decoration Graphics -->
+    <div class="fixed inset-0 pointer-events-none z-0 opacity-30">
+        <div class="absolute -top-32 -left-32 w-96 h-96 bg-brand-primary/20 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-10 right-10 w-96 h-96 bg-brand-secondary/20 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- SECTION 1: AUTHENTICATION & LOGIN VIEW (เข้าสู่ระบบองค์กร) -->
+    <!-- ========================================================================= -->
+    <main id="view-auth" class="flex-grow flex items-center justify-center p-3 sm:p-6 md:p-8 relative z-10">
+        <div class="w-full max-w-5xl glass-card rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[600px]">
+            
+            <!-- Left Side: Enterprise Visual -->
+            <div class="hidden lg:flex lg:col-span-5 bg-card-pattern p-10 text-white flex-col justify-between relative overflow-hidden">
+                <div class="absolute inset-0 bg-black/20 backdrop-blur-[1px]"></div>
+
+                <div class="relative z-10">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-11 h-11 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-inner border border-white/20">
+                            O
+                        </div>
+                        <span class="text-2xl font-bold tracking-tight">Our Little Store</span>
+                    </div>
+                    
+                    <h2 class="text-3xl font-bold leading-tight mb-3">ระบบเบิกจ่าย & ตรวจสอบการเงิน</h2>
+                    <p class="text-white/95 text-sm font-light leading-relaxed drop-shadow-sm">
+                        ควบคุมงบประมาณ เบิกจ่ายอุปกรณ์ภายในองค์กร และตรวจสอบโปร่งใส Real-time
+                    </p>
+                </div>
+
+                <div class="space-y-3.5 my-6 relative z-10">
+                    <div class="flex items-center gap-3.5 bg-white/15 backdrop-blur-md p-3.5 rounded-2xl border border-white/20 shadow-sm">
+                        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                            <i data-lucide="user-check" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <div class="text-xs">
+                            <p class="font-semibold text-white">ผู้เบิกสินค้า/พนักงาน (Requester)</p>
+                            <p class="text-white/80">ยื่นเรื่องเบิกพัสดุ เลือกลักษณะการรับของ</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3.5 bg-white/15 backdrop-blur-md p-3.5 rounded-2xl border border-white/20 shadow-sm">
+                        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                            <i data-lucide="file-check-2" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <div class="text-xs">
+                            <p class="font-semibold text-white">ผู้ตรวจสอบการเงิน/แอดมิน (Financial Auditor)</p>
+                            <p class="text-white/80">อนุมัติงบประมาณ เพิ่มรายการพัสดุ ตรวจสอบรายงาน</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-xs text-white/80 relative z-10">
+                    © 2026 Internal Governance System. All rights reserved.
+                </div>
+            </div>
+
+            <!-- Right Side: Auth Forms -->
+            <div class="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between bg-white/95">
+                <div>
+                    <!-- Tabs -->
+                    <div class="flex border-b border-gray-100 mb-6">
+                        <button id="tab-signin" class="pb-3 px-4 font-semibold text-sm tab-active transition-all" onclick="switchAuthTab('signin')">
+                            เข้าสู่ระบบพนักงาน
+                        </button>
+                        <button id="tab-signup" class="pb-3 px-4 font-semibold text-sm text-gray-400 transition-all" onclick="switchAuthTab('signup')">
+                            ลงทะเบียนผู้ใช้งานใหม่
+                        </button>
+                    </div>
+
+                    <!-- Social Login -->
+                    <div class="mb-5">
+                        <button type="button" id="btn-google-login" class="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all font-semibold text-sm text-gray-700 shadow-sm">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                            </svg>
+                            เข้าสู่ระบบด้วย Google Account องค์กร
+                        </button>
+                    </div>
+
+                    <div class="relative flex items-center justify-center my-5">
+                        <div class="border-t border-gray-200 w-full"></div>
+                        <span class="bg-white px-3 text-xs text-gray-400">หรือใช้อีเมลองค์กร</span>
+                        <div class="border-t border-gray-200 w-full"></div>
+                    </div>
+
+                    <!-- Auth Form -->
+                    <form id="auth-form" class="space-y-4">
+                        
+                        <!-- Role Selection (เลือกสิทธิ์: ผู้เบิก หรือ ผู้ตรวจสอบการเงิน) -->
+                        <div>
+                            <label class="block text-xs font-semibold text-brand-dark mb-1.5">บทบาทในระบบ (Role)</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="flex items-center justify-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:border-brand-primary transition-all">
+                                    <input type="radio" name="accountRole" value="employee" checked class="accent-brand-primary">
+                                    <span class="text-xs font-semibold text-brand-dark">📦 พนักงานเบิกจ่าย</span>
+                                </label>
+                                <label class="flex items-center justify-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:border-brand-primary transition-all">
+                                    <input type="radio" name="accountRole" value="auditor" class="accent-brand-primary">
+                                    <span class="text-xs font-semibold text-brand-dark">📊 ผู้ตรวจสอบการเงิน / แอดมิน</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="field-name" class="hidden">
+                            <label for="displayName" class="block text-xs font-semibold text-brand-dark mb-1">ชื่อ-นามสกุล / แผนก</label>
+                            <input type="text" id="displayName" placeholder="สมชาย ใจดี (ฝ่ายบัญชี)" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand-primary">
+                        </div>
+
+                        <div>
+                            <label for="email" class="block text-xs font-semibold text-brand-dark mb-1">อีเมลองค์กร</label>
+                            <input type="email" id="email" required placeholder="user@company.com" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand-primary">
+                        </div>
+
+                        <div>
+                            <label for="password" class="block text-xs font-semibold text-brand-dark mb-1">รหัสผ่าน</label>
+                            <input type="password" id="password" required minlength="6" placeholder="อย่างน้อย 6 ตัวอักษร" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-brand-primary">
+                        </div>
+
+                        <button type="submit" id="btn-submit" class="w-full py-3 bg-brand-primary hover:bg-brand-primaryHover text-white font-semibold rounded-xl shadow-md transition-all text-sm">
+                            <span id="btn-submit-text">เข้าสู่ระบบ</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ========================================================================= -->
+    <!-- SECTION 2: EMPLOYEE REQUISITION VIEW (หน้ายื่นเรื่องเบิกจ่ายพัสดุสำหรับพนักงาน) -->
+    <!-- ========================================================================= -->
+    <main id="view-employee" class="hidden max-w-7xl mx-auto px-4 py-6 flex-grow w-full relative z-10 space-y-8">
+        <!-- Hero Banner -->
+        <div class="bg-hero-pattern text-white rounded-3xl p-8 shadow-xl relative overflow-hidden flex flex-col justify-end min-h-[220px]">
+            <div class="relative z-10 max-w-xl">
+                <span class="inline-block px-3 py-1 bg-brand-accent/90 text-white rounded-full text-xs font-semibold mb-3 backdrop-blur-sm">Internal Requisition</span>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2 drop-shadow-md">ยื่นคำร้องเบิกพัสดุ/อุปกรณ์ภายในองค์กร 📦</h1>
+                <p class="text-xs sm:text-sm text-white/95 drop-shadow">เลือกลักษณะการรับพัสดุ (รับที่คลัง หรือ ส่งภายในแผนก) เพื่อเข้าสู่กระบวนการอนุมัติงบประมาณ</p>
+            </div>
+        </div>
+
+        <!-- Option Settings: เลือกรูปแบบการรับพัสดุ -->
+        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-brand-dark flex items-center gap-2">
+                <i data-lucide="sliders-horizontal" class="w-4 h-4 text-brand-primary"></i> ตั้งค่ารูปแบบการรับสินค้า/พัสดุสำหรับการเบิกครั้งนี้
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <label id="delivery-opt-pickup" class="flex items-center gap-3 p-3.5 rounded-xl border border-brand-primary bg-brand-primary/5 cursor-pointer transition-all">
+                    <input type="radio" name="deliveryMethod" value="pickup" checked onchange="toggleDeliveryMode('pickup')" class="accent-brand-primary">
+                    <div>
+                        <p class="text-xs font-bold text-brand-dark">🏢 รับด้วยตนเองที่คลัง/แผนกพัสดุ (Self Pickup)</p>
+                        <p class="text-[11px] text-gray-500">ไม่ต้องมีกระบวนการจัดส่ง รับของโดยตรงกับเจ้าหน้าที่คลัง</p>
+                    </div>
+                </label>
+                <label id="delivery-opt-internal" class="flex items-center gap-3 p-3.5 rounded-xl border border-gray-200 bg-gray-50 cursor-pointer transition-all">
+                    <input type="radio" name="deliveryMethod" value="internal" onchange="toggleDeliveryMode('internal')" class="accent-brand-primary">
+                    <div>
+                        <p class="text-xs font-bold text-brand-dark">🚚 จัดส่งภายในองค์กร/ระหว่างแผนก (Internal Delivery)</p>
+                        <p class="text-[11px] text-gray-500">ให้เจ้าหน้าที่นำพัสดุไปส่ง ณ โต๊ะทำงาน/แผนกที่ระบุ</p>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <!-- Product Requisition List -->
+        <div>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-lg font-bold text-brand-dark">รายการพัสดุ/อุปกรณ์ที่มีในคลังกลาง</h2>
+                <span id="product-count" class="text-xs text-gray-500">กำลังโหลดรายการ...</span>
+            </div>
+            <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6"></div>
+        </div>
+    </main>
+
+    <!-- ========================================================================= -->
+    <!-- SECTION 3: FINANCIAL AUDITOR DASHBOARD (หน้าตรวจสอบการเงิน & แอดมิน) -->
+    <!-- ========================================================================= -->
+    <main id="view-auditor" class="hidden max-w-7xl mx-auto px-4 py-6 flex-grow w-full relative z-10 space-y-8">
+        
+        <!-- Header & Stats Cards -->
+        <div class="space-y-4">
+            <div class="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                <div>
+                    <h1 class="text-2xl font-bold text-brand-dark">📊 ระบบตรวจสอบการเงิน & จัดการคลังพัสดุ (Financial Audit Dashboard)</h1>
+                    <p class="text-xs text-gray-400 mt-1">อนุมัติคำร้องเบิกจ่าย ตรวจสอบงบประมาณคงเหลือ และตั้งค่ายอดคงคลัง</p>
+                </div>
+            </div>
+
+            <!-- Financial Metrics Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-400">คำร้องรออนุมัติการเงิน</p>
+                        <h3 id="stat-pending-count" class="text-2xl font-bold text-brand-accent mt-1">0 รายการ</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-brand-accent/10 rounded-2xl flex items-center justify-center text-brand-accent"><i data-lucide="clock" class="w-6 h-6"></i></div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-400">อนุมัติเบิกจ่ายแล้ววันนี้</p>
+                        <h3 id="stat-approved-count" class="text-2xl font-bold text-brand-secondary mt-1">0 รายการ</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-brand-secondary/10 rounded-2xl flex items-center justify-center text-brand-secondary"><i data-lucide="check-circle-2" class="w-6 h-6"></i></div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-400">รวมงบประมาณเบิกจ่ายทั้งหมด</p>
+                        <h3 id="stat-total-budget" class="text-2xl font-bold text-brand-primary mt-1">฿0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-brand-primary/10 rounded-2xl flex items-center justify-center text-brand-primary"><i data-lucide="coins" class="w-6 h-6"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Add Product/Asset Form -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-4">
+                <h2 class="text-lg font-bold text-brand-dark flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="w-5 h-5 text-brand-primary"></i> ลงทะเบียนพัสดุเข้าคลังใหม่
+                </h2>
+                <form id="auditor-add-product-form" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">ชื่อรายการพัสดุ / อุปกรณ์</label>
+                        <input type="text" id="p-name" required placeholder="เช่น กระดาษ A4 (กล่อง) / เมาส์ไร้สาย" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">มูลค่า/ราคาประเมินต่อหน่วย (บาท)</label>
+                        <input type="number" id="p-price" required placeholder="เช่น 450" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">URL รูปภาพพัสดุ</label>
+                        <input type="url" id="p-image" placeholder="https://images.unsplash.com/..." class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">หมวดหมู่ / รายละเอียด</label>
+                        <textarea id="p-desc" rows="2" placeholder="หมวดเครื่องเขียน / อุปกรณ์สำนักงาน..." class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none"></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-brand-primary hover:bg-brand-primaryHover text-white font-semibold rounded-xl text-sm shadow-md transition-all">
+                        + เพิ่มรายการลงคลังพัสดุ
+                    </button>
+                </form>
+            </div>
+
+            <!-- Product Asset List -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-4">
+                <h2 class="text-lg font-bold text-brand-dark flex items-center gap-2">
+                    <i data-lucide="package" class="w-5 h-5 text-brand-secondary"></i> รายการพัสดุทั้งหมดในระบบ
+                </h2>
+                <div id="auditor-product-list" class="space-y-3 max-h-[420px] overflow-y-auto pr-1"></div>
+            </div>
+        </div>
+
+        <!-- Audit Order Approval Table -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-4">
+            <h2 class="text-lg font-bold text-brand-dark flex items-center gap-2">
+                <i data-lucide="file-check-2" class="w-5 h-5 text-brand-accent"></i> รายการคำร้องเบิกพัสดุ และ การอนุมัติงบประมาณ (Audit Requisitions)
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-500 border-b border-gray-100">
+                            <th class="p-3">ผู้ยื่นคำร้อง (แผนก)</th>
+                            <th class="p-3">พัสดุที่ขอเบิก</th>
+                            <th class="p-3">รูปแบบการรับ</th>
+                            <th class="p-3">มูลค่างบเบิก</th>
+                            <th class="p-3">สถานะการเงิน</th>
+                            <th class="p-3 text-right">ดำเนินการอนุมัติ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditor-order-list"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-4 text-center text-xs text-gray-400 relative z-10">
+        © 2026 Internal Enterprise Procurement & Audit System. All rights reserved.
+    </footer>
+
+    <!-- Firebase SDK Modular Scripts (v10.x) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword,
+            signInWithPopup, 
+            GoogleAuthProvider,
+            signOut,
+            onAuthStateChanged,
+            updateProfile
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { 
+            getDatabase, 
+            ref, 
+            set, 
+            get,
+            onValue,
+            push,
+            remove,
+            update,
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAvo5ER6qSzA39yDKF_P10oFzC81UbWpXI",
+            authDomain: "my-store-f8182.firebaseapp.com",
+            databaseURL: "https://my-store-f8182-default-rtdb.firebaseio.com",
+            projectId: "my-store-f8182",
+            storageBucket: "my-store-f8182.firebasestorage.app",
+            messagingSenderId: "595340158567",
+            appId: "1:595340158567:web:5d1741b0be6e418cffd6c2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        let currentUser = null;
+        let currentUserRole = 'employee'; 
+        let currentAuthTab = 'signin';
+        let selectedDeliveryMode = 'pickup';
+
+        // Sample Enterprise Assets
+        const sampleProducts = [
+            {
+                name: "กระดาษ Double A 80gsm (กล่อง 5 รีม)",
+                price: 520,
+                description: "หมวดเครื่องเขียนสำนักงาน สำหรับพิมพ์เอกสารราชการ",
+                imageUrl: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?q=80&w=600&auto=format&fit=crop"
+            },
+            {
+                name: "ชุดเมาส์และคีย์บอร์ดไร้สาย Ergonomic",
+                price: 1250,
+                description: "หมวด IT อุปกรณ์ประจำโต๊ะทำงานพนักงานใหม่",
+                imageUrl: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?q=80&w=600&auto=format&fit=crop"
+            },
+            {
+                name: "ตลับหมึกพิมพ์ Laser Printer Black",
+                price: 2100,
+                description: "หมวด IT วัสดุสิ้นเปลืองประจำฝ่ายสารสนเทศ",
+                imageUrl: "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?q=80&w=600&auto=format&fit=crop"
+            }
+        ];
+
+        // ----------------------------------------------------
+        // Delivery Mode Switcher Logic
+        // ----------------------------------------------------
+        window.toggleDeliveryMode = (mode) => {
+            selectedDeliveryMode = mode;
+            const pickupEl = document.getElementById('delivery-opt-pickup');
+            const internalEl = document.getElementById('delivery-opt-internal');
+
+            if (mode === 'pickup') {
+                pickupEl.className = "flex items-center gap-3 p-3.5 rounded-xl border border-brand-primary bg-brand-primary/5 cursor-pointer transition-all";
+                internalEl.className = "flex items-center gap-3 p-3.5 rounded-xl border border-gray-200 bg-gray-50 cursor-pointer transition-all";
+            } else {
+                internalEl.className = "flex items-center gap-3 p-3.5 rounded-xl border border-brand-primary bg-brand-primary/5 cursor-pointer transition-all";
+                pickupEl.className = "flex items-center gap-3 p-3.5 rounded-xl border border-gray-200 bg-gray-50 cursor-pointer transition-all";
+            }
+        };
+
+        // ----------------------------------------------------
+        // Navigation Switcher (Auth / Employee / Auditor)
+        // ----------------------------------------------------
+        window.switchMainView = (targetView) => {
+            document.getElementById('view-auth').classList.add('hidden');
+            document.getElementById('view-employee').classList.add('hidden');
+            document.getElementById('view-auditor').classList.add('hidden');
+
+            if (targetView === 'employee') {
+                document.getElementById('view-employee').classList.remove('hidden');
+            } else if (targetView === 'auditor') {
+                document.getElementById('view-auditor').classList.remove('hidden');
+            } else {
+                document.getElementById('view-auth').classList.remove('hidden');
+            }
+        };
+
+        // ----------------------------------------------------
+        // Auth State & Role Loader
+        // ----------------------------------------------------
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            const navUser = document.getElementById('nav-user-section');
+
+            if (user) {
+                const userSnapshot = await get(ref(database, 'users/' + user.uid));
+                const userData = userSnapshot.val() || {};
+                currentUserRole = userData.role || 'employee';
+
+                navUser.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-brand-dark">
+                            ${currentUserRole === 'auditor' ? '📊 [ตรวจสอบการเงิน]' : '📦 [พนักงานเบิกจ่าย]'} ${user.displayName || user.email}
+                        </span>
+                        ${currentUserRole === 'auditor' ? 
+                            `<button onclick="switchMainView('auditor')" class="text-xs bg-brand-primary/10 text-brand-primary px-3 py-1.5 rounded-xl font-medium">แผงตรวจสอบการเงิน</button>` : 
+                            `<button onclick="switchMainView('employee')" class="text-xs bg-brand-secondary/10 text-brand-secondary px-3 py-1.5 rounded-xl font-medium">ยื่นเรื่องเบิกพัสดุ</button>`
+                        }
+                        <button id="btn-logout" class="text-xs bg-rose-50 text-rose-600 font-semibold px-3 py-1.5 rounded-xl border border-rose-100 hover:bg-rose-100 transition-all">
+                            ออกจากระบบ
+                        </button>
+                    </div>
+                `;
+
+                document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+
+                if (currentUserRole === 'auditor') {
+                    switchMainView('auditor');
+                } else {
+                    switchMainView('employee');
+                }
+            } else {
+                navUser.innerHTML = `
+                    <button onclick="switchMainView('auth')" class="text-xs bg-brand-primary text-white font-medium px-4 py-2 rounded-xl shadow hover:bg-brand-primaryHover transition-all">
+                        เข้าสู่ระบบพนักงาน
+                    </button>
+                `;
+                switchMainView('auth');
+            }
+        });
+
+        // ----------------------------------------------------
+        // Save User Profile to DB
+        // ----------------------------------------------------
+        async function saveUserToDatabase(user, role = 'employee', additionalData = {}) {
+            try {
+                await set(ref(database, 'users/' + user.uid), {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName || additionalData.displayName || "พนักงานองค์กร",
+                    role: role,
+                    lastLogin: serverTimestamp(),
+                    ...additionalData
+                });
+            } catch (err) {
+                console.error("Error saving user:", err);
+            }
+        }
+
+        // Auth Form Event
+        document.getElementById('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const displayName = document.getElementById('displayName').value.trim();
+            const selectedRole = document.querySelector('input[name="accountRole"]:checked').value;
+            const btnSubmit = document.getElementById('btn-submit');
+
+            btnSubmit.disabled = true;
+
+            try {
+                if (currentAuthTab === 'signup') {
+                    const res = await createUserWithEmailAndPassword(auth, email, password);
+                    if (displayName) await updateProfile(res.user, { displayName });
+                    await saveUserToDatabase(res.user, selectedRole, { displayName });
+                    showToast('สมัครสมาชิกสำเร็จ!', 'บันทึกข้อมูลบุคลากรเข้าสู่ระบบเรียบร้อย', 'success');
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    showToast('เข้าสู่ระบบสำเร็จ!', 'ยินดีต้อนรับกลับเข้าสู่ระบบองค์กร', 'success');
+                }
+            } catch (err) {
+                showToast('การยืนยันตัวตนไม่สำเร็จ', 'อีเมลหรือรหัสผ่านไม่ถูกต้อง', 'error');
+            } finally {
+                btnSubmit.disabled = false;
+            }
+        });
+
+        // Google Sign In
+        document.getElementById('btn-google-login').addEventListener('click', async () => {
+            try {
+                const selectedRole = document.querySelector('input[name="accountRole"]:checked').value;
+                const result = await signInWithPopup(auth, googleProvider);
+                await saveUserToDatabase(result.user, selectedRole);
+                showToast('เข้าสู่ระบบสำเร็จ', `ยินดีต้อนรับคุณ ${result.user.displayName}`, 'success');
+            } catch (err) {
+                showToast('Google Sign-In Error', 'ไม่สามารถเข้าสู่ระบบด้วย Google องค์กรได้', 'error');
+            }
+        });
+
+        // ----------------------------------------------------
+        // Real-time Product Asset Loader
+        // ----------------------------------------------------
+        const productsRef = ref(database, 'stores');
+        onValue(productsRef, (snapshot) => {
+            const employeeGrid = document.getElementById('product-grid');
+            const auditorList = document.getElementById('auditor-product-list');
+            const data = snapshot.val();
+
+            if (!data) {
+                sampleProducts.forEach(async (p) => await push(productsRef, p));
+                return;
+            }
+
+            const items = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+            document.getElementById('product-count').innerText = `${items.length} รายการพัสดุ`;
+
+            // Employee View Render
+            employeeGrid.innerHTML = '';
+            items.forEach(item => {
+                const img = item.imageUrl || "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?q=80&w=600&auto=format&fit=crop";
+                employeeGrid.innerHTML += `
+                    <div class="bg-white rounded-2xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="w-full h-36 bg-gray-100 rounded-xl mb-3 overflow-hidden flex items-center justify-center">
+                                <img src="${img}" class="w-full h-full object-cover hover:scale-105 transition-all duration-300">
+                            </div>
+                            <h3 class="font-bold text-sm text-brand-dark line-clamp-1">${item.name || 'พัสดุ'}</h3>
+                            <p class="text-xs text-gray-400 mt-1 line-clamp-2">${item.description || 'พัสดุสำนักงาน'}</p>
+                        </div>
+                        <div class="mt-3 flex items-center justify-between border-t border-gray-50 pt-2">
+                            <span class="font-bold text-xs text-brand-primary">มูลค่า ฿${item.price || 0}</span>
+                            <button onclick="requestRequisition('${item.id}', '${item.name}', ${item.price})" class="bg-brand-primary hover:bg-brand-primaryHover text-white px-3 py-1.5 rounded-xl text-xs font-medium transition-all shadow-sm flex items-center gap-1">
+                                <i data-lucide="file-plus" class="w-3.5 h-3.5"></i> ยื่นเบิก
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Auditor View Render
+            auditorList.innerHTML = '';
+            items.forEach(item => {
+                auditorList.innerHTML += `
+                    <div class="flex items-center justify-between p-3.5 bg-gray-50 rounded-2xl border border-gray-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-white rounded-xl overflow-hidden border flex items-center justify-center shrink-0">
+                                ${item.imageUrl ? `<img src="${item.imageUrl}" class="w-full h-full object-cover">` : `<i data-lucide="package" class="w-5 h-5 text-gray-300"></i>`}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-800">${item.name}</h4>
+                                <p class="text-xs text-brand-primary font-semibold">มูลค่าประเมิน ฿${item.price}</p>
+                            </div>
+                        </div>
+                        <button onclick="deleteProduct('${item.id}')" class="text-xs bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg border border-rose-100 hover:bg-rose-100">
+                            จำหน่ายออกจากคลัง
+                        </button>
+                    </div>
+                `;
+            });
+
+            lucide.createIcons();
+        });
+
+        // ----------------------------------------------------
+        // Request Requisition Function (ส่งเรื่องเบิกพัสดุ)
+        // ----------------------------------------------------
+        window.requestRequisition = async (id, name, price) => {
+            if (!currentUser) {
+                showToast('กรุณาเข้าสู่ระบบ', 'ต้องเข้าสู่ระบบพนักงานก่อนยื่นเบิกพัสดุ', 'info');
+                switchMainView('auth');
+                return;
+            }
+
+            const modeLabel = selectedDeliveryMode === 'pickup' ? 'รับด้วยตนเองที่คลัง (Self Pickup)' : 'ส่งภายในองค์กร (Internal Delivery)';
+
+            try {
+                await push(ref(database, 'orders'), {
+                    userId: currentUser.uid,
+                    userEmail: currentUser.email,
+                    userName: currentUser.displayName || 'พนักงานทั่วไป',
+                    productId: id,
+                    productName: name,
+                    price: price,
+                    deliveryMode: selectedDeliveryMode,
+                    deliveryLabel: modeLabel,
+                    status: 'Pending Audit',
+                    timestamp: serverTimestamp()
+                });
+                showToast('ยื่นเรื่องเบิกจ่ายสำเร็จ!', `ส่งคำร้องเบิก ${name} (${modeLabel}) เข้าสู่ระบบการเงินแล้ว`, 'success');
+            } catch (err) {
+                showToast('เกิดข้อผิดพลาด', 'ไม่สามารถบันทึกคำร้องได้', 'error');
+            }
+        };
+
+        // ----------------------------------------------------
+        // Auditor Management Functions
+        // ----------------------------------------------------
+        document.getElementById('auditor-add-product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('p-name').value;
+            const price = parseFloat(document.getElementById('p-price').value);
+            const imageUrl = document.getElementById('p-image').value;
+            const description = document.getElementById('p-desc').value;
+
+            await push(ref(database, 'stores'), { name, price, imageUrl, description });
+            e.target.reset();
+            showToast('ลงทะเบียนพัสดุสำเร็จ!', 'เพิ่มรายการเข้าคลังพัสดุกลางเรียบร้อยแล้ว', 'success');
+        });
+
+        window.deleteProduct = (id) => {
+            if (confirm('ยืนยันที่จะจำหน่ายพัสดุรายการนี้ออกจากคลัง?')) {
+                remove(ref(database, `stores/${id}`));
+                showToast('ตัดจำหน่ายเรียบร้อย', '', 'info');
+            }
+        };
+
+        // Real-time Audit & Financial Monitor
+        onValue(ref(database, 'orders'), (snapshot) => {
+            const orderList = document.getElementById('auditor-order-list');
+            const data = snapshot.val();
+            orderList.innerHTML = '';
+
+            let pendingCount = 0;
+            let approvedCount = 0;
+            let totalBudget = 0;
+
+            if (!data) {
+                orderList.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">ยังไม่มีรายการคำร้องเบิกพัสดุเข้ามา</td></tr>`;
+                updateAuditStats(0, 0, 0);
+                return;
+            }
+
+            Object.keys(data).forEach(id => {
+                const order = data[id];
+                const priceNum = parseFloat(order.price || 0);
+
+                if (order.status === 'Financial Approved') {
+                    approvedCount++;
+                    totalBudget += priceNum;
+                } else {
+                    pendingCount++;
+                }
+
+                const isApproved = order.status === 'Financial Approved';
+
+                orderList.innerHTML += `
+                    <tr class="border-b border-gray-100 hover:bg-gray-50/50">
+                        <td class="p-3 font-medium text-xs">${order.userName}<br><span class="text-gray-400 font-normal">${order.userEmail}</span></td>
+                        <td class="p-3 font-semibold text-xs text-brand-dark">${order.productName}</td>
+                        <td class="p-3 text-xs">
+                            <span class="px-2 py-0.5 rounded-md font-medium text-[11px] ${order.deliveryMode === 'pickup' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600'}">
+                                ${order.deliveryLabel || 'รับด้วยตนเอง'}
+                            </span>
+                        </td>
+                        <td class="p-3 font-bold text-xs text-brand-primary">฿${priceNum.toLocaleString()}</td>
+                        <td class="p-3">
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${isApproved ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                                ${order.status || 'Pending Audit'}
+                            </span>
+                        </td>
+                        <td class="p-3 text-right">
+                            ${!isApproved ? 
+                                `<button onclick="approveFinancialOrder('${id}')" class="text-[11px] bg-emerald-600 text-white font-medium px-3 py-1.5 rounded-lg hover:bg-emerald-700 shadow-sm transition-all">
+                                    อนุมัติงบเบิกจ่าย
+                                </button>` :
+                                `<span class="text-xs text-emerald-600 font-semibold flex items-center justify-end gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> อนุมัติแล้ว</span>`
+                            }
+                        </td>
+                    </tr>
+                `;
+            });
+
+            updateAuditStats(pendingCount, approvedCount, totalBudget);
+            lucide.createIcons();
+        });
+
+        function updateAuditStats(pending, approved, total) {
+            document.getElementById('stat-pending-count').innerText = `${pending} รายการ`;
+            document.getElementById('stat-approved-count').innerText = `${approved} รายการ`;
+            document.getElementById('stat-total-budget').innerText = `฿${total.toLocaleString()}`;
+        }
+
+        window.approveFinancialOrder = (id) => {
+            update(ref(database, `orders/${id}`), { status: 'Financial Approved' });
+            showToast('อนุมัติการเงินเรียบร้อย!', 'ลงบันทึกอนุมัติตัดงบประมาณสำเร็จ', 'success');
+        };
+
+        // UI Helpers
+        window.switchAuthTab = (mode) => {
+            currentAuthTab = mode;
+            document.getElementById('tab-signin').className = mode === 'signin' ? "pb-3 px-4 font-semibold text-sm tab-active transition-all" : "pb-3 px-4 font-semibold text-sm text-gray-400 transition-all";
+            document.getElementById('tab-signup').className = mode === 'signup' ? "pb-3 px-4 font-semibold text-sm tab-active transition-all" : "pb-3 px-4 font-semibold text-sm text-gray-400 transition-all";
+            document.getElementById('field-name').classList.toggle('hidden', mode === 'signin');
+            document.getElementById('btn-submit-text').innerText = mode === 'signup' ? "ลงทะเบียนบุคลากร" : "เข้าสู่ระบบ";
+        };
+
+        window.showToast = function(title, msg, type = 'info') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('translate-y-[-150%]', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-[-150%]', 'opacity-0'), 3500);
+        };
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>
